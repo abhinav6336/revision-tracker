@@ -1,0 +1,159 @@
+<html>
+<head>
+    <title>Revision-Tracker</title>
+</head>
+<style>
+    body{
+        background-color: rgb(218, 207, 115);
+        padding: 20px;
+    }
+</style>
+<body>
+    <style>
+        .heading{
+            padding:10px;
+            background-color:rgb(143, 133, 45) ;
+        }
+    </style>
+    <div>
+        <style>
+            h1{
+                background-color: rgb(143, 133, 45);
+            }
+        </style>
+        <h1 align="center">Revision-Tracker</h1>
+</div><div class="heading">
+        <!-- Input to type topic -->
+   <!--     <input type="text" name="topics" placeholder="Enter the topic name" padding:10px> -->
+
+        <!-- Button to send topic -->
+         <style> 
+         .topic-box {
+    background-color: lightgreen;
+    width: 120px;
+    height: 120px;
+    border-radius: 5px;
+    border: 2px solid #333;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.topic-name {
+    font-weight: bold;
+    text-align: center;
+}
+
+.revision-dates {
+    font-size: 12px;
+    background-color: rgba(255,255,255,0.5);
+    border-radius: 3px;
+    text-align: center;
+    padding: 2px;
+}
+
+         button{
+            background-color: yellowgreen;
+            border-radius: 5px;
+            font-weight:bold;
+            width: 100px;
+            font-size:18px;
+            font-style: italic; 
+            height: 60px; 
+            cursor:pointer;
+            margin:0.1px;
+            vertical-align: top;
+            transition: background-color 1s;
+         }
+         button:hover{
+            background-color: rgb(105, 161, 50);
+            box-shadow: 1px;
+         }
+         button:click{
+            background-color:rgb(16, 109, 65)
+         }
+         .topic-input{
+            padding :10px;
+            vertical-align: center;
+            margin-top: 10px;
+         }
+         #today{
+            display: flex;
+            flex-wrap: wrap;
+            gap:10px;
+         }
+         </style>
+        <input type="text" class="topic-input" id="topic-input" placeholder="Enter topic name" />
+        <button onclick="addtopics()">Add topic</button>
+        <button class="remove">Remove topic</button>
+        <button> Today</button>
+        <button> Quiz</button>
+        <button> Compete</button>
+        <button> Time table</button>
+        <style>
+            .margin{
+                margin-right: 700px;
+            }
+        </style>
+        <button class="margin"> To do list </button>
+        <button> Login</button>
+        <button> Sign up</button>
+    </div>
+    <style>
+        .today{
+            background-color: rgb(143, 133, 45);
+        }
+    </style>
+    <div id="today">
+  <!--      <h2> Revisions :</h2> -->
+    </div>
+    <script>
+        function addtopics() {
+           // topicInput.value="";
+            const topicInput = document.getElementById("topic-input");
+            const topicname=topicInput.value;
+            topicInput.value="";
+            if (!topicname.trim()) {
+                alert("Please enter a topic name.");
+                return;
+            }
+            const topicBox = document.createElement("div");
+            topicBox.classList.add("topic-box");
+            const nameDiv = document.createElement("div");
+            nameDiv.classList.add("topic-name");
+            nameDiv.textContent = topicname;
+            const revisionDiv = document.createElement("div");
+            revisionDiv.classList.add("revision-dates");
+            revisionDiv.textContent = "Dates here";
+            topicBox.appendChild(nameDiv);
+            topicBox.appendChild(revisionDiv);
+            document.getElementById("today").appendChild(topicBox);
+            topicInput.value = "";
+            fetch("http://localhost:8080/topics", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ topic: topicname })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Topic added successfully!");
+                    document.getElementById("topic-input").value = ""; // clear input
+                } else {
+                    alert("Failed to add topic.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+    <style>
+        .today{
+            background-color: rgb(143, 133, 45) ;
+            margin: auto;
+        }
+    </style>
+</body>
+</html>
