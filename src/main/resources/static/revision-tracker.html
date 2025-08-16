@@ -7,28 +7,14 @@
         background-color: rgb(218, 207, 115);
         padding: 20px;
     }
-</style>
-<body>
-    <style>
         .heading{
             padding:10px;
             background-color:rgb(143, 133, 45) ;
         }
-    </style>
-    <div>
-        <style>
-            h1{
+          h1{
                 background-color: rgb(143, 133, 45);
             }
-        </style>
-        <h1 align="center">Revision-Tracker</h1>
-</div><div class="heading">
-        <!-- Input to type topic -->
-   <!--     <input type="text" name="topics" placeholder="Enter the topic name" padding:10px> -->
-
-        <!-- Button to send topic -->
-         <style> 
-         .topic-box {
+                    .topic-box {
     background-color: lightgreen;
     width: 120px;
     height: 120px;
@@ -84,7 +70,19 @@
             flex-wrap: wrap;
             gap:10px;
          }
-         </style>
+          .margin{
+                margin-right: 700px;
+            }
+         .today{
+            background-color: rgb(143, 133, 45) ;
+            margin: auto;
+        }
+</style>
+<body>
+   
+    <div>
+        <h1 align="center">Revision-Tracker</h1>
+</div><div class="heading">
         <input type="text" class="topic-input" id="topic-input" placeholder="Enter topic name" />
         <button onclick="addtopics()">Add topic</button>
         <button class="remove">Remove topic</button>
@@ -92,22 +90,11 @@
         <button> Quiz</button>
         <button> Compete</button>
         <button> Time table</button>
-        <style>
-            .margin{
-                margin-right: 700px;
-            }
-        </style>
         <button class="margin"> To do list </button>
         <button> Login</button>
         <button> Sign up</button>
     </div>
-    <style>
-        .today{
-            background-color: rgb(143, 133, 45);
-        }
-    </style>
     <div id="today">
-  <!--      <h2> Revisions :</h2> -->
     </div>
     <script>
         function addtopics() {
@@ -148,12 +135,6 @@
             })
             .catch(error => console.error("Error:", error));
         }
-    </script>
-    <style>
-        .today{
-            background-color: rgb(143, 133, 45) ;
-            margin: auto;
-        }
-    </style>
+        </script>
 </body>
 </html>

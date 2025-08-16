@@ -2,7 +2,6 @@ package com.abhinav.demo.model;
 import java.time.LocalDate;
 
 import com.abhinav.demo.repo.revisionrepo;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Entity

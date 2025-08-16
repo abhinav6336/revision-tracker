@@ -6,6 +6,7 @@ import com.abhinav.demo.model.Revision;
 import com.abhinav.demo.service.revisiontrackerservice;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
-@RestController
+@Controller
 @CrossOrigin
 public class homecontroller {
     @Autowired
     revisiontrackerservice service;
     @RequestMapping("/")
-    public String greet(){
-        return "Welcome to revision-tracker";
+   public String greet(){
+        return "revision-tracker.html";
     }
     @RequestMapping("/about")
     public String about(){
@@ -39,5 +40,9 @@ public class homecontroller {
     @GetMapping("/topics")
     public List<Revision> gettopics(){
         return service.gettopics();
+    }
+    @GetMapping("/topics/{id}")
+    public String id(@PathVariable int id){
+        return "not that techno";
     }
 }
