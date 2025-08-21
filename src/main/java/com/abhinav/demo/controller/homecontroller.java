@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.List;
 
 @Controller
@@ -28,6 +30,7 @@ public class homecontroller {
         return "revision-tracker.html";
     }
     @RequestMapping("/about")
+    @ResponseBody
     public String about(){
         return "hello i am abhinav and this is my first project.";
     }
