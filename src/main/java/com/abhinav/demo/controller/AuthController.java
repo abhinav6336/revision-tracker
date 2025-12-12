@@ -93,4 +93,63 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
+    
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        
+        String email = request.get("email");
+        
+        if (email == null || email.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Email is required");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        
+        String token = userService.createPasswordResetToken(email);
+        
+        if (token == null) {
+            response.put("success", false);
+            response.put("message", "Email not found in system");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        
+        response.put("success", true);
+        response.put("message", "Password reset link sent to email. Check your inbox.");
+        response.put("token", token);
+        return ResponseEntity.ok(response);
+    }
+    
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        
+        String token = request.get("token");
+        String newPassword = request.get("password");
+        
+        if (token == null || token.trim().isEmpty() ||
+            newPassword == null || newPassword.trim().isEmpty()) {
+            response.put("success", false);
+            response.put("message", "Token and password are required");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        
+        if (newPassword.length() < 6) {
+            response.put("success", false);
+            response.put("message", "Password must be at least 6 characters");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+        
+        boolean success = userService.resetPassword(token, newPassword);
+        
+        if (success) {
+            response.put("success", true);
+            response.put("message", "Password reset successful! You can now login.");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("success", false);
+            response.put("message", "Invalid or expired reset token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 }

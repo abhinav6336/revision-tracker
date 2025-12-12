@@ -87,6 +87,7 @@
             <input type="text" id="loginUsername" placeholder="Username" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
             <input type="password" id="loginPassword" placeholder="Password" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
             <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="loginError"></div>
+            <div style="text-align:center;margin-bottom:12px"><button style="background:none;border:none;color:#1976d2;cursor:pointer;padding:0;font-size:13px" onclick="document.getElementById('loginModal').style.display='none';document.getElementById('forgotModal').style.display='flex'">Forgot Password?</button></div>
             <div style="display:flex;gap:8px;justify-content:flex-end">
                 <button id="loginCancel" class="small">Cancel</button>
                 <button id="loginSubmit" class="small">Login</button>
@@ -109,6 +110,34 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Forgot Password</h3>
+            <p style="margin:0 0 12px 0;font-size:14px;color:#666">Enter your email address and we'll send you a link to reset your password.</p>
+            <input type="email" id="forgotEmail" placeholder="Email address" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="forgotError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="forgotCancel" class="small">Cancel</button>
+                <button id="forgotSubmit" class="small">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Reset Password</h3>
+            <input type="password" id="resetPassword" placeholder="New Password" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="resetConfirm" placeholder="Confirm Password" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="resetError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="resetCancel" class="small">Cancel</button>
+                <button id="resetSubmit" class="small">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete modal -->
     <div id="deleteModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
         <div style="background:#fff;padding:14px;border-radius:8px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
@@ -124,6 +153,20 @@
     <script>
         const API_ROOT = ''; // uses same origin; if running on different port, set to http://localhost:8080
         let todayFilterActive = false;
+        
+        function getCurrentUser() {
+            const user = localStorage.getItem('currentUser');
+            return user ? JSON.parse(user) : null;
+        }
+        
+        function getAuthHeaders() {
+            const user = getCurrentUser();
+            const headers = { "Content-Type": "application/json" };
+            if (user && user.id) {
+                headers["X-User-Id"] = user.id;
+            }
+            return headers;
+        }
 
         function createTopicElement(item){
             const topicBox = document.createElement("div");
@@ -149,7 +192,14 @@
         }
 
         function loadTopics(){
-            fetch(API_ROOT + '/topics')
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('Not logged in');
+                return;
+            }
+            fetch(API_ROOT + '/topics', {
+                headers: getAuthHeaders()
+            })
             .then(r=>r.json())
             .then(list=>{
                 const container = document.getElementById('today');
@@ -162,12 +212,17 @@
         }
 
         function addtopics() {
+            const user = getCurrentUser();
+            if (!user) {
+                alert("Please login first");
+                return;
+            }
             const topicInput = document.getElementById("topic-input");
             const topicname = topicInput.value.trim();
             if (!topicname) { alert("Please enter a topic name."); return; }
             fetch(API_ROOT + '/topics', {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ topic: topicname })
             })
             .then(response => {
@@ -217,7 +272,10 @@
             if (!confirm('Delete ' + checked.length + ' topic(s)?')) return;
             // delete sequentially and remove from DOM
             Promise.all(checked.map(topic =>
-                fetch(API_ROOT + '/topics/' + encodeURIComponent(topic), { method: 'DELETE' })
+                fetch(API_ROOT + '/topics/' + encodeURIComponent(topic), { 
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                })
                 .then(r=>({topic,r}))
                 .catch(e=>({topic,error:e}))
             ))
