@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.abhinav.demo.model.Revision;
 import com.abhinav.demo.repo.revisionrepo;
@@ -33,10 +34,16 @@ public class revisiontrackerservice {
     }
 
     public List<Revision> gettopics(Long userId){
-        return repo.findByUserId(userId);
+        // return newest topics first
+        return repo.findByUserIdOrderByIdDesc(userId);
     }
 
     public void removetopics(String topic, Long userId){
+        repo.deleteByTopicAndUserId(topic, userId);
+    }
+
+    @Transactional
+    public void removetopicsTransactional(String topic, Long userId){
         repo.deleteByTopicAndUserId(topic, userId);
     }
 }

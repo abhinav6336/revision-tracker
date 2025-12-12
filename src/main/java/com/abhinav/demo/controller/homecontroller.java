@@ -110,7 +110,35 @@ public class homecontroller {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
         
-        service.removetopics(topic, userId);
+        System.out.println("[DELETE] topic=" + topic + " userId=" + userId);
+        service.removetopicsTransactional(topic, userId);
+        response.put("success", true);
+        response.put("message", "Topic deleted successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/topics/delete")
+    public ResponseEntity<Map<String, Object>> deletetopicsPost(
+            @RequestBody Map<String, String> body,
+            @RequestHeader(value = "X-User-Id", required = false) Long userId){
+
+        Map<String, Object> response = new HashMap<>();
+
+        if (userId == null) {
+            response.put("success", false);
+            response.put("message", "User not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+
+        String topic = body.get("topic");
+        System.out.println("[POST /topics/delete] topic=" + topic + " userId=" + userId);
+        if (topic == null || topic.trim().isEmpty()){
+            response.put("success", false);
+            response.put("message", "Topic is required");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        service.removetopicsTransactional(topic, userId);
         response.put("success", true);
         response.put("message", "Topic deleted successfully");
         return ResponseEntity.ok(response);

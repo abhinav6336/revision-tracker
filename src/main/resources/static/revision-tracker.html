@@ -23,7 +23,7 @@
         h1{
             margin:0 0 12px 0;
             text-align:center;
-            color: #fff;
+            color: #2b2b2b;
         }
         .topic-box {
             background-color: #ffffff;
@@ -70,8 +70,12 @@
         <div class="spacer"></div>
         <div style="display:flex;gap:8px;align-items:center">
             <button id="todoBtn" class="margin small">To do list</button>
-            <button id="loginBtn" class="small">Login</button>
-            <button id="signupBtn" class="small">Sign up</button>
+            <div id="authArea" style="display:flex;gap:8px;align-items:center">
+                <div id="userDisplay" style="display:none;color:#fff;font-weight:700;padding:6px 8px;border-radius:6px;background:rgba(0,0,0,0.08)"></div>
+                <button id="logoutBtn" class="small" style="display:none">Logout</button>
+                <button id="loginBtn" class="small">Login</button>
+                <button id="signupBtn" class="small">Sign up</button>
+            </div>
         </div>
     </div>
 
@@ -272,22 +276,23 @@
             if (!confirm('Delete ' + checked.length + ' topic(s)?')) return;
             // delete sequentially and remove from DOM
             Promise.all(checked.map(topic =>
-                fetch(API_ROOT + '/topics/' + encodeURIComponent(topic), { 
-                    method: 'DELETE',
-                    headers: getAuthHeaders()
+                fetch(API_ROOT + '/topics/delete', { 
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ topic })
                 })
                 .then(r=>({topic,r}))
                 .catch(e=>({topic,error:e}))
             ))
             .then(results=>{
-                results.forEach(res=>{
-                    if (res.r && res.r.ok){
-                        const el = document.querySelector('.topic-box[data-topic="'+CSS.escape(res.topic)+'"]');
-                        if (el) el.remove();
-                    } else {
-                        console.warn('Failed to delete',res.topic,res.r||res.error);
-                    }
-                });
+                console.log('delete results', results);
+                const failed = results.filter(r=>!(r.r && r.r.ok));
+                if (failed.length>0){
+                    console.warn('Some deletes failed', failed);
+                    alert('Some deletes failed — see console for details');
+                }
+                // Reload topics to reflect current server state (safer than trying to remove individual DOM nodes)
+                loadTopics();
             })
             .finally(()=>{ closeDeleteModal(); });
         });
@@ -359,6 +364,8 @@
                     document.getElementById('loginModal').style.display='none';
                     document.getElementById('loginUsername').value='';
                     document.getElementById('loginPassword').value='';
+                    renderAuthUI();
+                    loadTopics();
                 } else {
                     errorDiv.textContent = data.message || 'Login failed';
                 }
@@ -414,8 +421,39 @@
             });
         });
 
-        // Load topics on start
-        document.addEventListener('DOMContentLoaded', loadTopics);
+        // Auth UI helpers
+        function renderAuthUI(){
+            const user = getCurrentUser();
+            const userDisplay = document.getElementById('userDisplay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            if (user && user.username) {
+                userDisplay.textContent = user.username;
+                userDisplay.style.display = 'block';
+                logoutBtn.style.display = 'inline-block';
+                loginBtn.style.display = 'none';
+                signupBtn.style.display = 'none';
+            } else {
+                userDisplay.style.display = 'none';
+                logoutBtn.style.display = 'none';
+                loginBtn.style.display = 'inline-block';
+                signupBtn.style.display = 'inline-block';
+            }
+        }
+
+        function logoutUser(){
+            localStorage.removeItem('currentUser');
+            renderAuthUI();
+            document.getElementById('today').innerHTML = '';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{
+            if (confirm('Logout?')) logoutUser();
+        });
+
+        // Load topics and render auth UI on start
+        document.addEventListener('DOMContentLoaded', ()=>{ renderAuthUI(); loadTopics(); });
     </script>
 </body>
 </html>

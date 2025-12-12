@@ -10,6 +10,8 @@ import com.abhinav.demo.model.Revision;
 @Repository
 public interface revisionrepo extends JpaRepository<Revision, Long>{
     List<Revision> findByUserId(Long userId);
+    // Return revisions for a user ordered by id desc (newest first)
+    List<Revision> findByUserIdOrderByIdDesc(Long userId);
     Optional<Revision> findByTopicAndUserId(String topic, Long userId);
     boolean existsByTopicAndUserId(String topic, Long userId);
     void deleteByTopicAndUserId(String topic, Long userId);
