@@ -1,140 +1,363 @@
 <html>
 <head>
     <title>Revision-Tracker</title>
-</head>
-<style>
-    body{
-        background-color: rgb(218, 207, 115);
-        padding: 20px;
-    }
-        .heading{
-            padding:10px;
-            background-color:rgb(143, 133, 45) ;
-        }
-          h1{
-                background-color: rgb(143, 133, 45);
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root{--accent:#8b5e3c;--muted:#fbf6ef;--button:#d7c0a4}
+            body{
+                background: linear-gradient(180deg,#fbf8f5 0%, #efe1d0 100%);
+                padding: 18px;
+                font-family: Inter, system-ui, -apple-system, Arial, Helvetica, sans-serif;
+                color:#2b2b2b;
             }
-                    .topic-box {
-    background-color: lightgreen;
-    width: 120px;
-    height: 120px;
-    border-radius: 5px;
-    border: 2px solid #333;
-    margin: 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 5px;
-}
-
-.topic-name {
-    font-weight: bold;
-    text-align: center;
-}
-
-.revision-dates {
-    font-size: 12px;
-    background-color: rgba(255,255,255,0.5);
-    border-radius: 3px;
-    text-align: center;
-    padding: 2px;
-}
-
-         button{
-            background-color: yellowgreen;
-            border-radius: 5px;
-            font-weight:bold;
-            width: 100px;
-            font-size:18px;
-            font-style: italic; 
-            height: 60px; 
-            cursor:pointer;
-            margin:0.1px;
-            vertical-align: top;
-            transition: background-color 1s;
-         }
-         button:hover{
-            background-color: rgb(105, 161, 50);
-            box-shadow: 1px;
-         }
-         button:click{
-            background-color:rgb(16, 109, 65)
-         }
-         .topic-input{
-            padding :10px;
-            vertical-align: center;
-            margin-top: 10px;
-         }
-         #today{
+            .heading{
+                padding:12px;
+                background-color:var(--accent);
+                border-radius:8px;
+                display:flex;
+                flex-wrap:wrap;
+                gap:8px;
+                align-items:center;
+                color: #fff;
+            }
+        h1{
+            margin:0 0 12px 0;
+            text-align:center;
+            color: #fff;
+        }
+        .topic-box {
+            background-color: #ffffff;
+            min-width: 140px;
+            min-height: 110px;
+            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.12);
+            margin: 6px;
             display: flex;
-            flex-wrap: wrap;
-            gap:10px;
-         }
-          .margin{
-                margin-right: 700px;
-            }
-         .today{
-            background-color: rgb(143, 133, 45) ;
-            margin: auto;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease;
         }
-</style>
+        .topic-box:hover{transform: translateY(-3px); box-shadow:0 6px 12px rgba(0,0,0,0.08)}
+        .topic-box.selected{outline:3px solid rgba(139,94,60,0.22); background:#fff5ec}
+        .topic-name {font-weight: 700; text-align: center; margin-bottom:6px}
+        .revision-dates {font-size: 12px; background-color: rgba(240,244,249,0.9); border-radius: 4px; padding:6px; white-space:pre-wrap; flex:1; overflow:auto}
+        button{background-color: var(--button); border-radius:6px; font-weight:600; padding:10px 12px; font-size:14px; cursor:pointer; border:none; color:#3d2b1f}
+        button.small{padding:8px 10px; font-size:13px}
+        button:hover{filter:brightness(.98)}
+        .topic-input{padding:8px; border-radius:6px; border:1px solid rgba(0,0,0,0.12); min-width:160px}
+        #today{display:flex; flex-wrap:wrap; gap:12px; margin-top:16px}
+        .spacer{flex:1}
+        .controls-left{display:flex; gap:8px; align-items:center}
+        .placeholder-panel{display:none; background:#fff; padding:12px; border-radius:6px; box-shadow:0 4px 10px rgba(0,0,0,0.06); margin-left:12px}
+        @media(max-width:640px){.heading{flex-direction:column; align-items:stretch}.margin{margin-right:0;width:100%}}
+    </style>
+</head>
 <body>
-   
-    <div>
-        <h1 align="center">Revision-Tracker</h1>
-</div><div class="heading">
-        <input type="text" class="topic-input" id="topic-input" placeholder="Enter topic name" />
-        <button onclick="addtopics()">Add topic</button>
-        <button class="remove">Remove topic</button>
-        <button> Today</button>
-        <button> Quiz</button>
-        <button> Compete</button>
-        <button> Time table</button>
-        <button class="margin"> To do list </button>
-        <button> Login</button>
-        <button> Sign up</button>
+    <h1>Revision-Tracker</h1>
+    <div class="heading">
+        <div class="controls-left">
+            <input type="text" class="topic-input" id="topic-input" placeholder="Enter topic name" />
+            <button onclick="addtopics()">Add topic</button>
+            <button id="removeBtn" class="small">Remove topic</button>
+            <button id="todayBtn" class="small">Today</button>
+            <button id="quizBtn" class="small">Quiz</button>
+            <button id="competeBtn" class="small">Compete</button>
+            <button id="timetableBtn" class="small">Time table</button>
+        </div>
+        <div class="spacer"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <button id="todoBtn" class="margin small">To do list</button>
+            <button id="loginBtn" class="small">Login</button>
+            <button id="signupBtn" class="small">Sign up</button>
+        </div>
     </div>
+
     <div id="today">
     </div>
+
+    <div id="placeholder" class="placeholder-panel"></div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Login</h3>
+            <input type="text" id="loginUsername" placeholder="Username" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="loginPassword" placeholder="Password" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="loginError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="loginCancel" class="small">Cancel</button>
+                <button id="loginSubmit" class="small">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Sign Up</h3>
+            <input type="text" id="signupUsername" placeholder="Username" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="email" id="signupEmail" placeholder="Email" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="signupError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="signupCancel" class="small">Cancel</button>
+                <button id="signupSubmit" class="small">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete modal -->
+    <div id="deleteModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div style="background:#fff;padding:14px;border-radius:8px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 8px 0">Delete topics</h3>
+            <div id="deleteList" style="max-height:260px;overflow:auto;padding:6px;border:1px solid rgba(0,0,0,0.06);border-radius:6px;background:#fff8f2"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+                <button id="cancelDelete" class="small">Cancel</button>
+                <button id="confirmDelete" class="small">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function addtopics() {
-           // topicInput.value="";
-            const topicInput = document.getElementById("topic-input");
-            const topicname=topicInput.value;
-            topicInput.value="";
-            if (!topicname.trim()) {
-                alert("Please enter a topic name.");
-                return;
-            }
+        const API_ROOT = ''; // uses same origin; if running on different port, set to http://localhost:8080
+        let todayFilterActive = false;
+
+        function createTopicElement(item){
             const topicBox = document.createElement("div");
             topicBox.classList.add("topic-box");
+            topicBox.dataset.topic = item.topic || item['topic'];
             const nameDiv = document.createElement("div");
             nameDiv.classList.add("topic-name");
-            nameDiv.textContent = topicname;
+            nameDiv.textContent = item.topic || item['topic'];
             const revisionDiv = document.createElement("div");
             revisionDiv.classList.add("revision-dates");
-            revisionDiv.textContent = "Dates here";
+            // autodates may be named 'autodates' or 'revisiondates' depending on server
+            const dates = item.autodates || item.revisiondates || '';
+            revisionDiv.textContent = dates || (item.date || '');
+            topicBox.dataset.autodates = dates || '';
+            topicBox.dataset.date = item.date || '';
             topicBox.appendChild(nameDiv);
             topicBox.appendChild(revisionDiv);
-            document.getElementById("today").appendChild(topicBox);
-            topicInput.value = "";
-            fetch("http://localhost:8080/topics", {
+            topicBox.addEventListener('click', ()=>{
+                document.querySelectorAll('.topic-box').forEach(b=>b.classList.remove('selected'));
+                topicBox.classList.add('selected');
+            });
+            return topicBox;
+        }
+
+        function loadTopics(){
+            fetch(API_ROOT + '/topics')
+            .then(r=>r.json())
+            .then(list=>{
+                const container = document.getElementById('today');
+                container.innerHTML='';
+                list.forEach(item=>{
+                    container.appendChild(createTopicElement(item));
+                });
+            })
+            .catch(e=>console.warn('Could not load topics',e));
+        }
+
+        function addtopics() {
+            const topicInput = document.getElementById("topic-input");
+            const topicname = topicInput.value.trim();
+            if (!topicname) { alert("Please enter a topic name."); return; }
+            fetch(API_ROOT + '/topics', {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ topic: topicname })
             })
             .then(response => {
                 if (response.ok) {
-                    alert("Topic added successfully!");
-                    document.getElementById("topic-input").value = ""; // clear input
+                    topicInput.value = '';
+                    loadTopics();
                 } else {
-                    alert("Failed to add topic.");
+                    response.text().then(t=>alert('Failed to add topic: '+t));
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => { console.error("Error:", error); alert('Error adding topic'); });
         }
-        </script>
+
+        // Open modal to choose topics to delete
+        document.getElementById('removeBtn').addEventListener('click', ()=>{
+            openDeleteModal();
+        });
+
+        function openDeleteModal(){
+            populateDeleteModal();
+            document.getElementById('deleteModal').style.display='flex';
+        }
+        function closeDeleteModal(){
+            document.getElementById('deleteModal').style.display='none';
+        }
+
+        function populateDeleteModal(){
+            const list = document.getElementById('deleteList');
+            list.innerHTML='';
+            // collect current topics from DOM
+            const topics = Array.from(document.querySelectorAll('.topic-box')).map(b=>({topic:b.dataset.topic, title:b.querySelector('.topic-name')?.textContent||b.dataset.topic}));
+            if (topics.length===0){ list.innerHTML='<div style="padding:12px;color:#777">No topics available</div>'; return; }
+            topics.forEach(t=>{
+                const row = document.createElement('div');
+                row.style.display='flex'; row.style.alignItems='center'; row.style.gap='8px'; row.style.padding='6px';
+                const cb = document.createElement('input'); cb.type='checkbox'; cb.value=t.topic;
+                const label = document.createElement('div'); label.textContent = t.title; label.style.flex='1';
+                row.appendChild(cb); row.appendChild(label);
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('cancelDelete').addEventListener('click', ()=>closeDeleteModal());
+        document.getElementById('confirmDelete').addEventListener('click', ()=>{
+            const checked = Array.from(document.querySelectorAll('#deleteList input[type=checkbox]:checked')).map(i=>i.value);
+            if (checked.length===0){ alert('Select one or more topics to delete'); return; }
+            if (!confirm('Delete ' + checked.length + ' topic(s)?')) return;
+            // delete sequentially and remove from DOM
+            Promise.all(checked.map(topic =>
+                fetch(API_ROOT + '/topics/' + encodeURIComponent(topic), { method: 'DELETE' })
+                .then(r=>({topic,r}))
+                .catch(e=>({topic,error:e}))
+            ))
+            .then(results=>{
+                results.forEach(res=>{
+                    if (res.r && res.r.ok){
+                        const el = document.querySelector('.topic-box[data-topic="'+CSS.escape(res.topic)+'"]');
+                        if (el) el.remove();
+                    } else {
+                        console.warn('Failed to delete',res.topic,res.r||res.error);
+                    }
+                });
+            })
+            .finally(()=>{ closeDeleteModal(); });
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', ()=>{
+            const today = new Date().toISOString().slice(0,10);
+            const boxes = document.querySelectorAll('.topic-box');
+            if (!todayFilterActive){
+                boxes.forEach(b=>{
+                    const ad = b.dataset.autodates || '';
+                    if (ad.includes(today)){
+                        b.style.display = 'flex';
+                    } else {
+                        b.style.display = 'none';
+                    }
+                });
+                todayFilterActive = true;
+                document.getElementById('todayBtn').textContent = 'Show all';
+            } else {
+                boxes.forEach(b=> b.style.display = 'flex');
+                todayFilterActive = false;
+                document.getElementById('todayBtn').textContent = 'Today';
+            }
+        });
+
+        document.getElementById('quizBtn').addEventListener('click', ()=>alert('Quiz feature coming soon'));
+        document.getElementById('competeBtn').addEventListener('click', ()=>alert('Compete feature coming soon'));
+        document.getElementById('timetableBtn').addEventListener('click', ()=>{
+            const p = document.getElementById('placeholder');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            p.textContent = 'Timetable view placeholder — integrate your timetable here.';
+        });
+
+        document.getElementById('todoBtn').addEventListener('click', ()=>{
+            const todo = prompt('Quick add to-do item:');
+            if (!todo) return;
+            const arr = JSON.parse(localStorage.getItem('rtodos')||'[]'); arr.push({text:todo,at:new Date().toISOString()}); localStorage.setItem('rtodos',JSON.stringify(arr));
+            alert('To-do added (stored locally).');
+        });
+
+        // Login Modal
+        document.getElementById('loginBtn').addEventListener('click', ()=>{
+            document.getElementById('loginModal').style.display='flex';
+            document.getElementById('loginError').textContent='';
+        });
+        document.getElementById('loginCancel').addEventListener('click', ()=>{
+            document.getElementById('loginModal').style.display='none';
+        });
+        document.getElementById('loginSubmit').addEventListener('click', ()=>{
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!username || !password) {
+                errorDiv.textContent = 'Username and password are required';
+                return;
+            }
+            
+            fetch(API_ROOT + '/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    alert('Login successful!');
+                    document.getElementById('loginModal').style.display='none';
+                    document.getElementById('loginUsername').value='';
+                    document.getElementById('loginPassword').value='';
+                } else {
+                    errorDiv.textContent = data.message || 'Login failed';
+                }
+            })
+            .catch(e => {
+                errorDiv.textContent = 'Error: ' + e.message;
+            });
+        });
+
+        // Signup Modal
+        document.getElementById('signupBtn').addEventListener('click', ()=>{
+            document.getElementById('signupModal').style.display='flex';
+            document.getElementById('signupError').textContent='';
+        });
+        document.getElementById('signupCancel').addEventListener('click', ()=>{
+            document.getElementById('signupModal').style.display='none';
+        });
+        document.getElementById('signupSubmit').addEventListener('click', ()=>{
+            const username = document.getElementById('signupUsername').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+            const errorDiv = document.getElementById('signupError');
+            
+            if (!username || !email || !password) {
+                errorDiv.textContent = 'All fields are required';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+            
+            fetch(API_ROOT + '/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('signupModal').style.display='none';
+                    document.getElementById('signupUsername').value='';
+                    document.getElementById('signupEmail').value='';
+                    document.getElementById('signupPassword').value='';
+                } else {
+                    errorDiv.textContent = data.message || 'Signup failed';
+                }
+            })
+            .catch(e => {
+                errorDiv.textContent = 'Error: ' + e.message;
+            });
+        });
+
+        // Load topics on start
+        document.addEventListener('DOMContentLoaded', loadTopics);
+    </script>
 </body>
 </html>
