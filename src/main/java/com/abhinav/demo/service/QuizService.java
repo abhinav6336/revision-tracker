@@ -22,19 +22,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class QuizService {
 
     private String getApiKey() {
+        // 1. Try Environment Variable (Railway/Cloud)
+        String envKey = System.getenv("gemini_api_key");
+        if (envKey != null && !envKey.isBlank()) {
+            return envKey.trim();
+        }
+
+        // 2. Fallback to local file (Local Config)
         try {
-            // Read from root directory
             String key = Files.readString(Path.of("gemini_api_key.txt")).trim();
             if (key.contains("PASTE_YOUR_GEMINI_API_KEY_HERE") || key.isEmpty()) {
                 System.err.println("API Key file contains placeholder or is empty.");
                 return null;
             }
-            // If the user pasted the key with "key=" prefix or similar, clean it
-            // Typically keys are alphanumeric, maybe dashes/underscores.
-            // Let's just trim whitespace.
             return key;
         } catch (IOException e) {
-            System.err.println("Could not read gemini_api_key.txt: " + e.getMessage());
+            System.err.println("Could not read gemini_api_key.txt or find env var 'gemini_api_key': " + e.getMessage());
             return null;
         }
     }
