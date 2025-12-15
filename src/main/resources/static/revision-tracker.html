@@ -1,0 +1,780 @@
+<html>
+
+<head>
+    <title>Revision-Tracker</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root {
+            --accent: #8b5e3c;
+            --muted: #fbf6ef;
+            --button: #d7c0a4
+        }
+
+        body {
+            background: rgb(218, 207, 115);
+            padding: 18px;
+            font-family: Inter, system-ui, -apple-system, Arial, Helvetica, sans-serif;
+            color: #2b2b2b;
+        }
+
+        .heading {
+            padding: 12px;
+            background-color: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            color: #fff;
+        }
+
+        h1 {
+            margin: 0 0 12px 0;
+            text-align: center;
+            color: #2b2b2b;
+        }
+
+        .topic-box {
+            background-color: lightgreen;
+            min-width: 140px;
+            min-height: 110px;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.12);
+            margin: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .topic-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08)
+        }
+
+        .topic-box.selected {
+            outline: 3px solid rgba(139, 94, 60, 0.22);
+            background: #fff5ec
+        }
+
+        .topic-name {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6px
+        }
+
+        .revision-dates {
+            font-size: 12px;
+            background-color: rgba(240, 244, 249, 0.9);
+            border-radius: 4px;
+            padding: 6px;
+            white-space: pre-wrap;
+            flex: 1;
+            overflow: auto
+        }
+
+        button {
+            background-color: var(--button);
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 10px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            color: #3d2b1f
+        }
+
+        button.small {
+            padding: 8px 10px;
+            font-size: 13px
+        }
+
+        button:hover {
+            filter: brightness(.98)
+        }
+
+        .topic-input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            min-width: 160px
+        }
+
+        #today {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px
+        }
+
+        .spacer {
+            flex: 1
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        .placeholder-panel {
+            display: none;
+            background: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+            margin-left: 12px
+        }
+
+        @media(max-width:640px) {
+            .heading {
+                flex-direction: column;
+                align-items: stretch
+            }
+
+            .margin {
+                margin-right: 0;
+                width: 100%
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Revision-Tracker</h1>
+    <div class="heading">
+        <div class="controls-left">
+            <input type="text" class="topic-input" id="topic-input" placeholder="Enter topic name" />
+            <button onclick="addtopics()">Add topic</button>
+            <button id="removeBtn" class="small">Remove topic</button>
+            <button id="todayBtn" class="small">Today</button>
+            <button id="quizBtn" class="small">Quiz</button>
+            <button id="competeBtn" class="small">Compete</button>
+            <button id="timetableBtn" class="small">Time table</button>
+        </div>
+        <div class="spacer"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+            <button id="todoBtn" class="margin small">To do list</button>
+            <div id="authArea" style="display:flex;gap:8px;align-items:center">
+                <div id="userDisplay"
+                    style="display:none;color:#fff;font-weight:700;padding:6px 8px;border-radius:6px;background:rgba(0,0,0,0.08)">
+                </div>
+                <button id="logoutBtn" class="small" style="display:none">Logout</button>
+                <button id="loginBtn" class="small">Login</button>
+                <button id="signupBtn" class="small">Sign up</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="today">
+    </div>
+
+    <div id="placeholder" class="placeholder-panel"></div>
+
+    <!-- Login Modal -->
+    <div id="loginModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Login</h3>
+            <input type="text" id="loginUsername" placeholder="Username"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="loginPassword" placeholder="Password"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="loginError"></div>
+            <div style="text-align:center;margin-bottom:12px"><button
+                    style="background:none;border:none;color:#1976d2;cursor:pointer;padding:0;font-size:13px"
+                    onclick="document.getElementById('loginModal').style.display='none';document.getElementById('forgotModal').style.display='flex'">Forgot
+                    Password?</button></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="loginCancel" class="small">Cancel</button>
+                <button id="loginSubmit" class="small">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Sign Up</h3>
+            <input type="text" id="signupUsername" placeholder="Username"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="email" id="signupEmail" placeholder="Email"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="signupPassword" placeholder="Password (min 6 chars)"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="signupError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="signupCancel" class="small">Cancel</button>
+                <button id="signupSubmit" class="small">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Forgot Password</h3>
+            <p style="margin:0 0 12px 0;font-size:14px;color:#666">Enter your email address and we'll send you a link to
+                reset your password.</p>
+            <input type="email" id="forgotEmail" placeholder="Email address"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="forgotError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="forgotCancel" class="small">Cancel</button>
+                <button id="forgotSubmit" class="small">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:20px;border-radius:8px;max-width:400px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 16px 0">Reset Password</h3>
+            <input type="password" id="resetPassword" placeholder="New Password"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <input type="password" id="resetConfirm" placeholder="Confirm Password"
+                style="width:100%;padding:10px;border:1px solid rgba(0,0,0,0.12);border-radius:4px;margin-bottom:12px;box-sizing:border-box" />
+            <div style="color:#d32f2f;margin-bottom:12px;font-size:14px;" id="resetError"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="resetCancel" class="small">Cancel</button>
+                <button id="resetSubmit" class="small">Reset Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete modal -->
+    <div id="deleteModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:14px;border-radius:8px;max-width:520px;width:92%;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <h3 style="margin:0 0 8px 0">Delete topics</h3>
+            <div id="deleteList"
+                style="max-height:260px;overflow:auto;padding:6px;border:1px solid rgba(0,0,0,0.06);border-radius:6px;background:#fff8f2">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+                <button id="cancelDelete" class="small">Cancel</button>
+                <button id="confirmDelete" class="small">Delete Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal"
+        style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);z-index:40">
+        <div
+            style="background:#fff;padding:20px;border-radius:8px;max-width:600px;width:92%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h3 style="margin:0">Daily Quiz</h3>
+                <button onclick="document.getElementById('quizModal').style.display='none'" class="small">Close</button>
+            </div>
+            <div id="quizContent" style="flex:1;overflow:auto;padding:4px"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_ROOT = ''; // uses same origin; if running on different port, set to http://localhost:8080
+        let todayFilterActive = false;
+
+        function getCurrentUser() {
+            const user = localStorage.getItem('currentUser');
+            return user ? JSON.parse(user) : null;
+        }
+
+        function getAuthHeaders() {
+            const user = getCurrentUser();
+            const headers = { "Content-Type": "application/json" };
+            if (user && user.id) {
+                headers["X-User-Id"] = user.id;
+            }
+            return headers;
+        }
+
+        function createTopicElement(item) {
+            const topicBox = document.createElement("div");
+            topicBox.classList.add("topic-box");
+            topicBox.dataset.topic = item.topic || item['topic'];
+            const nameDiv = document.createElement("div");
+            nameDiv.classList.add("topic-name");
+            nameDiv.textContent = item.topic || item['topic'];
+            const revisionDiv = document.createElement("div");
+            revisionDiv.classList.add("revision-dates");
+            // autodates may be named 'autodates' or 'revisiondates' depending on server
+            const dates = item.autodates || item.revisiondates || '';
+            revisionDiv.textContent = dates || (item.date || '');
+            topicBox.dataset.autodates = dates || '';
+            topicBox.dataset.date = item.date || '';
+            topicBox.appendChild(nameDiv);
+            topicBox.appendChild(revisionDiv);
+            topicBox.addEventListener('click', () => {
+                document.querySelectorAll('.topic-box').forEach(b => b.classList.remove('selected'));
+                topicBox.classList.add('selected');
+            });
+            return topicBox;
+        }
+
+        function loadTopics() {
+            const user = getCurrentUser();
+            if (!user) {
+                console.log('Not logged in');
+                return;
+            }
+            fetch(API_ROOT + '/topics', {
+                headers: getAuthHeaders()
+            })
+                .then(r => r.json())
+                .then(list => {
+                    const container = document.getElementById('today');
+                    container.innerHTML = '';
+                    list.forEach(item => {
+                        container.appendChild(createTopicElement(item));
+                    });
+                })
+                .catch(e => console.warn('Could not load topics', e));
+        }
+
+        function addtopics() {
+            const user = getCurrentUser();
+            if (!user) {
+                alert("Please login first");
+                return;
+            }
+            const topicInput = document.getElementById("topic-input");
+            const topicname = topicInput.value.trim();
+            if (!topicname) { alert("Please enter a topic name."); return; }
+            fetch(API_ROOT + '/topics', {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ topic: topicname })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        topicInput.value = '';
+                        loadTopics();
+                    } else {
+                        response.text().then(t => alert('Failed to add topic: ' + t));
+                    }
+                })
+                .catch(error => { console.error("Error:", error); alert('Error adding topic'); });
+        }
+
+        // Open modal to choose topics to delete
+        document.getElementById('removeBtn').addEventListener('click', () => {
+            openDeleteModal();
+        });
+
+        function openDeleteModal() {
+            populateDeleteModal();
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function populateDeleteModal() {
+            const list = document.getElementById('deleteList');
+            list.innerHTML = '';
+            // collect current topics from DOM
+            const topics = Array.from(document.querySelectorAll('.topic-box')).map(b => ({
+                topic: b.dataset.topic,
+                title: b.querySelector('.topic-name')?.textContent || b.dataset.topic,
+                date: b.dataset.date || ''
+            }));
+            if (topics.length === 0) { list.innerHTML = '<div style="padding:12px;color:#777">No topics available</div>'; return; }
+            topics.forEach(t => {
+                const row = document.createElement('div');
+                row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '8px'; row.style.padding = '6px';
+                const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = t.topic;
+                const label = document.createElement('div');
+                label.textContent = t.title + (t.date ? ' (' + t.date + ')' : '');
+                label.style.flex = '1';
+                row.appendChild(cb); row.appendChild(label);
+                list.appendChild(row);
+            });
+        }
+
+        document.getElementById('cancelDelete').addEventListener('click', () => closeDeleteModal());
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            const checked = Array.from(document.querySelectorAll('#deleteList input[type=checkbox]:checked')).map(i => i.value);
+            if (checked.length === 0) { alert('Select one or more topics to delete'); return; }
+            if (!confirm('Delete ' + checked.length + ' topic(s)?')) return;
+            // delete sequentially and remove from DOM
+            Promise.all(checked.map(topic =>
+                fetch(API_ROOT + '/topics/delete', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ topic })
+                })
+                    .then(r => ({ topic, r }))
+                    .catch(e => ({ topic, error: e }))
+            ))
+                .then(results => {
+                    console.log('delete results', results);
+                    const failed = results.filter(r => !(r.r && r.r.ok));
+                    if (failed.length > 0) {
+                        console.warn('Some deletes failed', failed);
+                        alert('Some deletes failed — see console for details');
+                    }
+                    // Reload topics to reflect current server state (safer than trying to remove individual DOM nodes)
+                    loadTopics();
+                })
+                .finally(() => { closeDeleteModal(); });
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            const today = new Date().toISOString().slice(0, 10);
+            const boxes = document.querySelectorAll('.topic-box');
+            if (!todayFilterActive) {
+                boxes.forEach(b => {
+                    const ad = b.dataset.autodates || '';
+                    if (ad.includes(today)) {
+                        b.style.display = 'flex';
+                    } else {
+                        b.style.display = 'none';
+                    }
+                });
+                todayFilterActive = true;
+                document.getElementById('todayBtn').textContent = 'Show all';
+            } else {
+                boxes.forEach(b => b.style.display = 'flex');
+                todayFilterActive = false;
+                document.getElementById('todayBtn').textContent = 'Today';
+            }
+        });
+
+        document.getElementById('quizBtn').addEventListener('click', () => {
+            openQuizModal();
+        });
+
+        function openQuizModal() {
+            const modal = document.getElementById('quizModal');
+            modal.style.display = 'flex';
+            document.getElementById('quizContent').innerHTML = '<div style="text-align:center;padding:20px">Loading questions for today\'s topics...</div>';
+
+            fetch(API_ROOT + '/api/quiz/today', {
+                headers: getAuthHeaders()
+            })
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('quizContent');
+                    if (data.message && !data.questions) {
+                        container.innerHTML = `<div style="text-align:center;padding:20px">${data.message}</div>`;
+                        return;
+                    }
+                    if (!data.questions || data.questions.length === 0) {
+                        container.innerHTML = `<div style="text-align:center;padding:20px">No questions could be generated.</div>`;
+                        return;
+                    }
+
+                    renderQuiz(data.questions);
+                })
+                .catch(e => {
+                    document.getElementById('quizContent').innerHTML = `<div style="text-align:center;color:red;padding:20px">Error loading quiz: ${e.message}</div>`;
+                });
+        }
+
+        function renderQuiz(questions) {
+            const container = document.getElementById('quizContent');
+            container.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.style.background = '#f9f9f9';
+                card.style.padding = '16px';
+                card.style.marginBottom = '16px';
+                card.style.borderRadius = '8px';
+                card.style.border = '1px solid #ddd';
+
+                const title = document.createElement('h4');
+                title.textContent = `Q${index + 1} (${q.topic}): ${q.question}`;
+                title.style.margin = '0 0 12px 0';
+                card.appendChild(title);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.style.display = 'flex';
+                optionsDiv.style.flexDirection = 'column';
+                optionsDiv.style.gap = '8px';
+
+                q.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.textContent = opt;
+                    btn.style.textAlign = 'left';
+                    btn.style.background = '#fff';
+                    btn.style.border = '1px solid #ccc';
+                    btn.style.color = '#333';
+
+                    btn.onclick = () => {
+                        // Disable all buttons in this card
+                        Array.from(optionsDiv.children).forEach(b => b.disabled = true);
+
+                        if (opt === q.answer) {
+                            btn.style.background = '#d4edda'; // green
+                            btn.style.borderColor = '#c3e6cb';
+                            btn.textContent += ' ✅ Correct!';
+                        } else {
+                            btn.style.background = '#f8d7da'; // red
+                            btn.style.borderColor = '#f5c6cb';
+                            btn.textContent += ' ❌ Incorrect';
+
+                            // Highlight correct answer
+                            Array.from(optionsDiv.children).forEach(b => {
+                                if (b.textContent === q.answer) {
+                                    b.style.background = '#d4edda';
+                                    b.textContent += ' (Correct Answer)';
+                                }
+                            });
+                        }
+                    };
+                    optionsDiv.appendChild(btn);
+                });
+                card.appendChild(optionsDiv);
+                container.appendChild(card);
+            });
+        }
+        document.getElementById('competeBtn').addEventListener('click', () => alert('Compete feature coming soon'));
+        document.getElementById('timetableBtn').addEventListener('click', () => {
+            const p = document.getElementById('placeholder');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            p.textContent = 'Timetable view placeholder — integrate your timetable here.';
+        });
+
+        document.getElementById('todoBtn').addEventListener('click', () => {
+            const todo = prompt('Quick add to-do item:');
+            if (!todo) return;
+            const arr = JSON.parse(localStorage.getItem('rtodos') || '[]'); arr.push({ text: todo, at: new Date().toISOString() }); localStorage.setItem('rtodos', JSON.stringify(arr));
+            alert('To-do added (stored locally).');
+        });
+
+        // Login Modal
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('loginError').textContent = '';
+        });
+        document.getElementById('loginCancel').addEventListener('click', () => {
+            document.getElementById('loginModal').style.display = 'none';
+        });
+        document.getElementById('loginSubmit').addEventListener('click', () => {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorDiv.textContent = 'Username and password are required';
+                return;
+            }
+
+            fetch(API_ROOT + '/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('currentUser', JSON.stringify(data.user));
+                        alert('Login successful!');
+                        document.getElementById('loginModal').style.display = 'none';
+                        document.getElementById('loginUsername').value = '';
+                        document.getElementById('loginPassword').value = '';
+                        renderAuthUI();
+                        loadTopics();
+                    } else {
+                        errorDiv.textContent = data.message || 'Login failed';
+                    }
+                })
+                .catch(e => {
+                    errorDiv.textContent = 'Error: ' + e.message;
+                });
+        });
+
+        // Signup Modal
+        document.getElementById('signupBtn').addEventListener('click', () => {
+            document.getElementById('signupModal').style.display = 'flex';
+            document.getElementById('signupError').textContent = '';
+        });
+        document.getElementById('signupCancel').addEventListener('click', () => {
+            document.getElementById('signupModal').style.display = 'none';
+        });
+        document.getElementById('signupSubmit').addEventListener('click', () => {
+            const username = document.getElementById('signupUsername').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+            const errorDiv = document.getElementById('signupError');
+
+            if (!username || !email || !password) {
+                errorDiv.textContent = 'All fields are required';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+
+            fetch(API_ROOT + '/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('signupModal').style.display = 'none';
+                        document.getElementById('signupUsername').value = '';
+                        document.getElementById('signupEmail').value = '';
+                        document.getElementById('signupPassword').value = '';
+                    } else {
+                        errorDiv.textContent = data.message || 'Signup failed';
+                    }
+                })
+                .catch(e => {
+                    errorDiv.textContent = 'Error: ' + e.message;
+                });
+        });
+
+        // Forgot Password Modal
+        document.getElementById('forgotCancel').addEventListener('click', () => {
+            document.getElementById('forgotModal').style.display = 'none';
+        });
+        document.getElementById('forgotSubmit').addEventListener('click', () => {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const errorDiv = document.getElementById('forgotError');
+
+            if (!email) {
+                errorDiv.textContent = 'Email is required';
+                return;
+            }
+
+            fetch(API_ROOT + '/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('forgotModal').style.display = 'none';
+                        document.getElementById('forgotEmail').value = '';
+                    } else {
+                        errorDiv.textContent = data.message || 'Failed to send reset link';
+                    }
+                })
+                .catch(e => {
+                    errorDiv.textContent = 'Error: ' + e.message;
+                });
+        });
+
+        // Reset Password Modal
+        document.getElementById('resetCancel').addEventListener('click', () => {
+            document.getElementById('resetModal').style.display = 'none';
+            // Clean URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        });
+        document.getElementById('resetSubmit').addEventListener('click', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const password = document.getElementById('resetPassword').value.trim();
+            const confirm = document.getElementById('resetConfirm').value.trim();
+            const errorDiv = document.getElementById('resetError');
+
+            if (!token) {
+                errorDiv.textContent = 'Missing reset token';
+                return;
+            }
+
+            if (!password || !confirm) {
+                errorDiv.textContent = 'Both fields are required';
+                return;
+            }
+
+            if (password !== confirm) {
+                errorDiv.textContent = 'Passwords do not match';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorDiv.textContent = 'Password must be at least 6 characters';
+                return;
+            }
+
+            fetch(API_ROOT + '/api/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, password })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        document.getElementById('resetModal').style.display = 'none';
+                        document.getElementById('loginModal').style.display = 'flex';
+                        document.getElementById('resetPassword').value = '';
+                        document.getElementById('resetConfirm').value = '';
+                        // Clean URL
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    } else {
+                        errorDiv.textContent = data.message || 'Reset failed';
+                    }
+                })
+                .catch(e => {
+                    errorDiv.textContent = 'Error: ' + e.message;
+                });
+        });
+
+        // Auth UI helpers
+        function renderAuthUI() {
+            const user = getCurrentUser();
+            const userDisplay = document.getElementById('userDisplay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            if (user && user.username) {
+                userDisplay.textContent = user.username;
+                userDisplay.style.display = 'block';
+                logoutBtn.style.display = 'inline-block';
+                loginBtn.style.display = 'none';
+                signupBtn.style.display = 'none';
+            } else {
+                userDisplay.style.display = 'none';
+                logoutBtn.style.display = 'none';
+                loginBtn.style.display = 'inline-block';
+                signupBtn.style.display = 'inline-block';
+            }
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('currentUser');
+            renderAuthUI();
+            document.getElementById('today').innerHTML = '';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Logout?')) logoutUser();
+        });
+
+        // Load topics and render auth UI on start
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAuthUI();
+            loadTopics();
+
+            // Check for reset token
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('token')) {
+                document.getElementById('resetModal').style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+
+</html>
