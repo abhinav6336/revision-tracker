@@ -1,6 +1,6 @@
 A while back, I came across this idea in a research article
 If you want to truly master any topic, you should revise it after
-1, 3, 7, 14, 30, 90, 180, and 365 days.
+1, 3, 7, 14, 30, 90, 180, and 365 days
 
 Makes sense, right?
 But here’s the catch try doing it for every topic you learn.
