@@ -43,12 +43,31 @@ public class QuizController {
             return ResponseEntity.ok(response);
         }
 
-        List<Map<String, Object>> questions = quizService.generateQuiz(topics);
+        // Default: 1 question per topic
+        List<Map<String, Object>> questions = quizService.generateQuiz(topics, topics.size());
 
         Map<String, Object> response = new HashMap<>();
         response.put("topics", topics);
         response.put("questions", questions);
 
         return ResponseEntity.ok(response);
+    }
+
+    @org.springframework.web.bind.annotation.PostMapping("/generate")
+    public ResponseEntity<Object> generateCustomQuiz(
+            @org.springframework.web.bind.annotation.RequestBody Map<String, Object> payload) {
+        @SuppressWarnings("unchecked")
+        List<String> topics = (List<String>) payload.get("topics");
+        Integer count = (Integer) payload.get("count");
+
+        if (topics == null || topics.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Topics list cannot be empty"));
+        }
+        if (count == null || count < 1) {
+            count = 5; // default
+        }
+
+        List<Map<String, Object>> questions = quizService.generateQuiz(topics, count);
+        return ResponseEntity.ok(Map.of("questions", questions));
     }
 }

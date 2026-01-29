@@ -54,7 +54,7 @@ public class QuizControllerTest {
         mockQuestion.put("options", List.of("A", "B"));
         mockQuestion.put("answer", "A");
 
-        when(quizService.generateQuiz(anyList())).thenReturn(List.of(mockQuestion));
+        when(quizService.generateQuiz(anyList(), any(Integer.class))).thenReturn(List.of(mockQuestion));
 
         mockMvc.perform(get("/api/quiz/today")
                 .header("X-User-Id", String.valueOf(userId)))

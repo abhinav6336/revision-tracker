@@ -42,7 +42,7 @@ public class QuizService {
         }
     }
 
-    public List<Map<String, Object>> generateQuiz(List<String> topics) {
+    public List<Map<String, Object>> generateQuiz(List<String> topics, int count) {
         List<Map<String, Object>> questions = new ArrayList<>();
 
         if (topics == null || topics.isEmpty()) {
@@ -67,7 +67,9 @@ public class QuizService {
         try {
             // constructing the prompt
             String topicList = String.join(", ", topics);
-            String promptText = "Generate 1 multiple-choice question for each of these topics: [" + topicList + "]. " +
+            String promptText = "Generate " + count
+                    + " multiple-choice questions total, distributed relevantly among these topics: [" + topicList
+                    + "]. " +
                     "Return a strictly valid JSON array of objects. " +
                     "Each object must have these keys: 'topic' (string), 'question' (string), 'options' (array of 4 strings), 'answer' (string, must match exactly one option). "
                     +
